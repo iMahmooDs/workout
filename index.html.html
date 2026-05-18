@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
+<title>Full Body · 3 Day Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface-2: #1c1c1c;
+    --surface-3: #242424;
+    --border: #2a2a2a;
+    --border-light: #333;
+    --text: #f5f5f5;
+    --text-dim: #a3a3a3;
+    --text-mute: #6b6b6b;
+    --accent: #ff5722;
+    --accent-dim: #c2410c;
+    --success: #4ade80;
+    --warn: #f59e0b;
+    --safe-top: env(safe-area-inset-top, 0);
+    --safe-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter Tight', -apple-system, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: none;
+  }
+
+  body {
+    padding-top: var(--safe-top);
+    padding-bottom: var(--safe-bottom);
+    min-height: 100vh;
+  }
+
+  #root { min-height: 100vh; }
+
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 2px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+const PLAN = {
+  weekSchedule: [
+    { day: 'Sun', label: 'Day A', type: 'lift', sessionId: 'A' },
+    { day: 'Mon', label: 'Walk', type: 'walk' },
+    { day: 'Tue', label: 'Day B', type: 'lift', sessionId: 'B' },
+    { day: 'Wed', label: 'Walk', type: 'walk' },
+    { day: 'Thu', label: 'Day C', type: 'lift', sessionId: 'C' },
+    { day: 'Fri', label: 'Walk', type: 'walk' },
+    { day: 'Sat', label: 'Rest', type: 'rest' },
+  ],
+  sessions: [
+    {
+      id: 'A', title: 'Full Body A', day: 'Sunday', duration: '~50 min',
+      exercises: [
+        { name: 'Goblet Squat', sets: '3 × 10', rest: '90s',
+          primary: ['Quads', 'Glutes'], secondary: ['Core', 'Upper back'],
+          videoQuery: 'goblet squat dumbbell form',
+          steps: ['Hold one dumbbell vertically at chest height, elbows tucked','Feet shoulder-width, toes slightly out','Sit down between your knees, chest tall','Go until thighs are parallel to the floor','Drive through your whole foot to stand'],
+          cue: 'Elbows stay inside your knees at the bottom. Don\'t let knees cave in.' },
+        { name: 'Flat Dumbbell Bench Press', sets: '3 × 10', rest: '90s',
+          primary: ['Chest', 'Front delts'], secondary: ['Triceps'],
+          videoQuery: 'flat dumbbell bench press form',
+          steps: ['Lie flat, feet planted firmly','Dumbbells at chest level, elbows at ~45° to torso','Press up until arms are nearly locked','Lower with control until dumbbells brush your chest','No bounce — pause briefly at the bottom'],
+          cue: 'Elbows at 45°, not flared wide. Wide flare wrecks shoulders.' },
+        { name: 'One-Arm Dumbbell Row', sets: '3 × 10 / side', rest: '90s',
+          primary: ['Lats', 'Mid back'], secondary: ['Biceps', 'Rear delts'],
+          videoQuery: 'one arm dumbbell row form',
+          steps: ['Knee and same-side hand on the bench','Other foot on the floor, flat back','Dumbbell hangs straight down','Pull elbow back toward your hip pocket','Squeeze shoulder blade at top, lower slowly'],
+          cue: 'Pull to your hip, not your chest. Lead with the elbow.' },
+        { name: 'Seated Dumbbell Shoulder Press', sets: '3 × 10', rest: '90s',
+          primary: ['Shoulders'], secondary: ['Triceps', 'Upper chest'],
+          videoQuery: 'seated dumbbell shoulder press form',
+          steps: ['Sit on the bench with back support','Dumbbells at shoulder height, palms forward','Press straight up with a slight inward arc','Stop just before lockout','Lower with control to shoulder level'],
+          cue: 'No aggressive lockout. Keep tension on the delts.' },
+        { name: 'Romanian Deadlift (Dumbbells)', sets: '3 × 10', rest: '90s',
+          primary: ['Hamstrings', 'Glutes'], secondary: ['Lower back'],
+          videoQuery: 'dumbbell romanian deadlift form',
+          steps: ['Stand with dumbbells in front of your thighs','Slight knee bend — kept constant','Hinge at the hips, push your butt back','Dumbbells slide down the front of your thighs','Go until you feel the hamstring stretch, then return'],
+          cue: 'Feel it in your hamstrings, not lower back. If your back rounds, stop earlier.' },
+        { name: 'Plank', sets: '3 × 45s', rest: '60s',
+          primary: ['Core'], secondary: ['Shoulders', 'Glutes'],
+          videoQuery: 'plank exercise proper form',
+          steps: ['Forearms on the floor, elbows under shoulders','Body in a straight line head to heels','Squeeze glutes and brace your abs','Tuck hips slightly under','Breathe normally — don\'t hold your breath'],
+          cue: 'No sagging back, no piked hips. Straight line.' }
+      ]
+    },
+    {
+      id: 'B', title: 'Full Body B', day: 'Tuesday', duration: '~50 min',
+      exercises: [
+        { name: 'Romanian Deadlift (Dumbbells)', sets: '3 × 10', rest: '90s',
+          primary: ['Hamstrings', 'Glutes'], secondary: ['Lower back'],
+          videoQuery: 'dumbbell romanian deadlift form',
+          steps: ['Today this leads — fresh hamstrings handle more','Stand with dumbbells in front of thighs','Hinge at hips, knees slightly bent','Lower until you feel the stretch','Drive hips forward to stand back up'],
+          cue: 'Leading with this means you can use slightly heavier weight than Day A.' },
+        { name: 'Incline Dumbbell Bench Press', sets: '3 × 10', rest: '90s',
+          primary: ['Upper chest', 'Front delts'], secondary: ['Triceps'],
+          videoQuery: 'incline dumbbell press form',
+          steps: ['Bench set to 30–45°','Dumbbells at shoulder level','Press up and slightly inward','Light touch at the top — dumbbells nearly touch','Lower under control to chest height'],
+          cue: 'Steeper angle = more shoulder, less chest. 30° hits upper chest best.' },
+        { name: 'Chest-Supported Row', sets: '3 × 10', rest: '90s',
+          primary: ['Mid back', 'Rhomboids'], secondary: ['Lats', 'Biceps'],
+          videoQuery: 'chest supported dumbbell row incline bench',
+          steps: ['Set bench to 30–45° incline','Lie face-down, chest on the bench','Dumbbells hang straight down','Pull elbows back, squeeze shoulder blades','Lower with control'],
+          cue: 'Lower back is out of this lift — pure back work.' },
+        { name: 'Bulgarian Split Squat', sets: '3 × 8 / side', rest: '90s',
+          primary: ['Quads', 'Glutes'], secondary: ['Adductors', 'Core'],
+          videoQuery: 'bulgarian split squat dumbbell form',
+          steps: ['Rear foot on the bench, top of foot down','Front foot far enough that knee tracks over ankle','Dumbbells at your sides','Lower straight down — don\'t lunge forward','Drive through front foot to stand'],
+          cue: 'Start lighter than you think. This is humbling.' },
+        { name: 'Dumbbell Lateral Raise', sets: '3 × 12', rest: '60s',
+          primary: ['Side delts'], secondary: [],
+          videoQuery: 'dumbbell lateral raise form',
+          steps: ['Stand with light dumbbells at your sides','Slight elbow bend, held throughout','Raise arms out to the sides','Stop at shoulder height — no higher','Lower slowly under control'],
+          cue: 'Pour-the-water at the top: pinky slightly above thumb.' },
+        { name: 'Bicep Curl + Tricep Extension', sets: '3 × 12 each', rest: '60s after both',
+          primary: ['Biceps', 'Triceps'], secondary: ['Forearms'],
+          videoQuery: 'dumbbell bicep curl tricep extension superset', isSuperset: true,
+          steps: ['CURL: Elbows pinned to sides, no swinging','CURL: Curl up to shoulder, control down','Immediately go to tricep extension','EXTENSION: One dumbbell in both hands, behind head','EXTENSION: Press up, elbows close to head'],
+          cue: 'Alternate sets: curls → extensions → rest. Then repeat.' }
+      ]
+    },
+    {
+      id: 'C', title: 'Full Body C', day: 'Thursday', duration: '~50 min',
+      exercises: [
+        { name: 'Goblet Squat', sets: '3 × 12', rest: '90s',
+          primary: ['Quads', 'Glutes'], secondary: ['Core'],
+          videoQuery: 'goblet squat dumbbell form',
+          steps: ['Higher reps today — use ~10% lighter weight than Sunday','Hold dumbbell at chest height','Same form: sit down between knees','Focus on depth and controlled tempo','Drive through heels and midfoot'],
+          cue: 'Quality over weight. Each rep should look the same as the first.' },
+        { name: 'Flat Dumbbell Bench Press', sets: '3 × 10', rest: '90s',
+          primary: ['Chest', 'Front delts'], secondary: ['Triceps'],
+          videoQuery: 'flat dumbbell bench press form',
+          steps: ['Same form as Day A','If you hit all reps clean Sunday, add 1–2.5 kg today','Plant feet, elbows at 45°','Touch chest lightly, no bounce','Press to nearly locked out'],
+          cue: 'Progressive overload week to week, not session to session.' },
+        { name: 'One-Arm Dumbbell Row', sets: '3 × 10 / side', rest: '90s',
+          primary: ['Lats', 'Mid back'], secondary: ['Biceps', 'Rear delts'],
+          videoQuery: 'one arm dumbbell row form',
+          steps: ['Knee + same hand on bench','Flat back, dumbbell hanging straight down','Pull elbow toward hip pocket','Squeeze, then lower slowly','Switch sides — match reps exactly'],
+          cue: 'Pause briefly at the top of each rep.' },
+        { name: 'Seated Dumbbell Shoulder Press', sets: '3 × 10', rest: '90s',
+          primary: ['Shoulders'], secondary: ['Triceps'],
+          videoQuery: 'seated dumbbell shoulder press form',
+          steps: ['Strict press — no leg drive','No excessive back arch','Press straight up','Lower to shoulder height','Shoulders do all the work'],
+          cue: 'If you have to cheat to finish reps, the weight is too heavy.' },
+        { name: 'Standing Calf Raise', sets: '3 × 15', rest: '60s',
+          primary: ['Calves'], secondary: [],
+          videoQuery: 'standing calf raise dumbbell',
+          steps: ['Dumbbells at your sides','Stand tall, feet hip-width','Rise as high as possible on the balls of your feet','Pause at the top for 1 second','Lower slowly, full stretch at the bottom'],
+          cue: 'The pause at the top is what makes it work.' },
+        { name: 'Hammer Curl', sets: '3 × 12', rest: '60s',
+          primary: ['Brachialis', 'Biceps'], secondary: ['Forearms'],
+          videoQuery: 'dumbbell hammer curl form',
+          steps: ['Stand with dumbbells at your sides','Neutral grip — palms face each other','Elbows pinned to your sides','Curl up without rotating wrists','Lower under full control'],
+          cue: 'Different from regular curls — hits the side of the upper arm.' }
+      ]
+    }
+  ]
+};
+
+const Icon = {
+  Chevron: ({ open }) => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{transform: open ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s'}}><polyline points="6 9 12 15 18 9"/></svg>
+  ),
+  Play: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+  ),
+  Timer: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="13" r="8"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="10" y1="1" x2="14" y2="1"/></svg>
+  ),
+  Reps: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h11M6.5 17.5h11"/><circle cx="4" cy="6.5" r="1.5"/><circle cx="20" cy="6.5" r="1.5"/><circle cx="4" cy="17.5" r="1.5"/><circle cx="20" cy="17.5" r="1.5"/></svg>
+  ),
+  Check: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  ),
+  External: () => (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+  ),
+  Warning: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+  )
+};
+
+function Header() {
+  return (
+    <div style={{padding: '24px 20px 0', borderBottom: '1px solid var(--border)'}}>
+      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--text-mute)', marginBottom: '20px'}}>
+        <span>Mahmood</span>
+        <span style={{color: 'var(--accent)'}}>● Active</span>
+      </div>
+      <h1 style={{fontFamily: 'Instrument Serif', fontSize: '44px', fontWeight: 400, lineHeight: '1.05', marginBottom: '12px', letterSpacing: '-0.02em'}}>
+        Three days.<br/>
+        <em style={{color: 'var(--accent)'}}>Whole body.</em>
+      </h1>
+      <p style={{fontSize: '14px', color: 'var(--text-dim)', marginBottom: '24px'}}>
+        Dumbbells · Bench · Walking · 16:8
+      </p>
+    </div>
+  );
+}
+
+function WeeklySchedule() {
+  return (
+    <div style={{padding: '24px 20px', borderBottom: '1px solid var(--border)'}}>
+      <div style={{fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--text-mute)', marginBottom: '14px'}}>Your Week</div>
+      <div style={{display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px'}}>
+        {PLAN.weekSchedule.map((d, i) => {
+          const isLift = d.type === 'lift';
+          const isWalk = d.type === 'walk';
+          return (
+            <a key={i} href={isLift ? `#day-${d.sessionId}` : null}
+              style={{aspectRatio: '1', background: isLift ? 'var(--accent)' : 'var(--surface)', border: '1px solid ' + (isLift ? 'var(--accent)' : 'var(--border)'), borderRadius: '10px', padding: '8px 4px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center', textDecoration: 'none', color: 'inherit'}}>
+              <span style={{fontFamily: 'JetBrains Mono', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: isLift ? 'rgba(255,255,255,0.85)' : 'var(--text-mute)'}}>{d.day}</span>
+              <span style={{fontSize: '11px', fontWeight: 600, color: isLift ? '#fff' : (isWalk ? 'var(--text-dim)' : 'var(--text-mute)'), textAlign: 'center', lineHeight: '1.1'}}>{d.label}</span>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function SequencingCard() {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div style={{padding: '20px', borderBottom: '1px solid var(--border)'}}>
+      <button onClick={() => setExpanded(!expanded)} style={{width: '100%', textAlign: 'left', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', padding: '16px', background: 'var(--surface)', borderRadius: '12px', border: '1px solid var(--border)'}}>
+        <div style={{flex: 1}}>
+          <div style={{fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: '6px'}}>How to perform each session</div>
+          <div style={{fontSize: '15px', fontWeight: 600, lineHeight: '1.3'}}>Straight sets, in order. Not circuits.</div>
+        </div>
+        <div style={{color: 'var(--text-mute)', marginTop: '4px'}}><Icon.Chevron open={expanded} /></div>
+      </button>
+      {expanded && (
+        <div style={{padding: '16px 4px 0', fontSize: '14px', color: 'var(--text-dim)', lineHeight: '1.6'}}>
+          <p style={{marginBottom: '10px'}}>Finish <strong style={{color: 'var(--text)'}}>all sets</strong> of exercise 1 — with the prescribed rest — before moving to exercise 2.</p>
+          <p style={{marginBottom: '10px'}}><strong style={{color: 'var(--text)'}}>Compound lifts first</strong> (squat, press, row) while fresh. Isolation work last.</p>
+          <p>The <span style={{color: 'var(--accent)', fontWeight: 600}}>marked superset</span> on Day B is the exception — opposing muscles don't compete for recovery.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MuscleTags({ primary, secondary }) {
+  return (
+    <div style={{display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '10px'}}>
+      {primary.map(m => (
+        <span key={m} style={{fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.05em', textTransform: 'uppercase', padding: '4px 8px', background: 'var(--accent)', color: '#fff', borderRadius: '4px', fontWeight: 500}}>{m}</span>
+      ))}
+      {secondary.map(m => (
+        <span key={m} style={{fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.05em', textTransform: 'uppercase', padding: '4px 8px', background: 'transparent', color: 'var(--text-dim)', border: '1px solid var(--border-light)', borderRadius: '4px', fontWeight: 500}}>{m}</span>
+      ))}
+    </div>
+  );
+}
+
+function ExerciseCard({ exercise, index }) {
+  const [open, setOpen] = useState(false);
+  const [done, setDone] = useState(false);
+  const ytSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(exercise.videoQuery)}`;
+
+  return (
+    <div style={{background: 'var(--surface)', border: '1px solid ' + (done ? 'var(--success)' : (exercise.isSuperset ? 'var(--accent)' : 'var(--border)')), borderRadius: '14px', marginBottom: '10px', overflow: 'hidden', transition: 'border-color 0.2s'}}>
+      <button onClick={() => setOpen(!open)} style={{width: '100%', textAlign: 'left', padding: '16px', display: 'flex', alignItems: 'flex-start', gap: '12px'}}>
+        <div style={{width: '32px', height: '32px', borderRadius: '50%', background: done ? 'var(--success)' : (exercise.isSuperset ? 'var(--accent)' : 'var(--surface-3)'), color: done ? '#000' : (exercise.isSuperset ? '#fff' : 'var(--text-dim)'), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 700, flexShrink: 0, fontFamily: 'JetBrains Mono'}}>
+          {done ? <Icon.Check /> : (exercise.isSuperset ? '⚡' : index + 1)}
+        </div>
+        <div style={{flex: 1, minWidth: 0}}>
+          <div style={{fontSize: '16px', fontWeight: 600, lineHeight: '1.25', marginBottom: '6px'}}>{exercise.name}</div>
+          <div style={{display: 'flex', gap: '14px', fontSize: '12px', color: 'var(--text-dim)', fontFamily: 'JetBrains Mono', flexWrap: 'wrap'}}>
+            <span style={{display: 'inline-flex', alignItems: 'center', gap: '4px'}}><Icon.Reps /> {exercise.sets}</span>
+            <span style={{display: 'inline-flex', alignItems: 'center', gap: '4px'}}><Icon.Timer /> {exercise.rest}</span>
+          </div>
+          <MuscleTags primary={exercise.primary} secondary={exercise.secondary} />
+        </div>
+        <div style={{color: 'var(--text-mute)', marginTop: '4px'}}><Icon.Chevron open={open} /></div>
+      </button>
+
+      {open && (
+        <div style={{padding: '0 16px 16px', borderTop: '1px solid var(--border)', marginTop: '4px', paddingTop: '16px'}}>
+          <a href={ytSearchUrl} target="_blank" rel="noopener"
+            style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', background: 'var(--surface-3)', border: '1px solid var(--border-light)', borderRadius: '10px', color: 'var(--text)', textDecoration: 'none', fontSize: '13px', fontWeight: 600, marginBottom: '16px'}}>
+            <Icon.Play /> Watch form demo on YouTube <Icon.External />
+          </a>
+
+          <div style={{fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--text-mute)', marginBottom: '10px'}}>How to do it</div>
+          <ol style={{listStyle: 'none', marginBottom: '16px'}}>
+            {exercise.steps.map((step, i) => (
+              <li key={i} style={{position: 'relative', paddingLeft: '32px', paddingBottom: '10px', fontSize: '14px', color: 'var(--text-dim)', lineHeight: '1.5'}}>
+                <span style={{position: 'absolute', left: 0, top: 0, width: '22px', height: '22px', borderRadius: '50%', background: 'var(--surface-2)', color: 'var(--text)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, fontFamily: 'JetBrains Mono', border: '1px solid var(--border-light)'}}>{i + 1}</span>
+                {step}
+              </li>
+            ))}
+          </ol>
+
+          <div style={{padding: '12px 14px', background: 'var(--surface-2)', borderRadius: '10px', borderLeft: '3px solid var(--accent)', fontSize: '13px', fontStyle: 'italic', color: 'var(--text)', lineHeight: '1.5', marginBottom: '14px'}}>
+            <span style={{fontFamily: 'JetBrains Mono', fontStyle: 'normal', fontSize: '10px', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--accent)', display: 'block', marginBottom: '4px'}}>Key Cue</span>
+            {exercise.cue}
+          </div>
+
+          <button onClick={() => setDone(!done)}
+            style={{width: '100%', padding: '12px', background: done ? 'var(--success)' : 'transparent', border: '1px solid ' + (done ? 'var(--success)' : 'var(--border-light)'), borderRadius: '10px', color: done ? '#000' : 'var(--text-dim)', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'}}>
+            {done ? <><Icon.Check /> Completed</> : 'Mark as done'}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Session({ session }) {
+  return (
+    <div id={`day-${session.id}`} style={{padding: '32px 20px 8px', scrollMarginTop: '70px'}}>
+      <div style={{display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px'}}>
+        <div>
+          <div style={{display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px'}}>
+            <span style={{fontFamily: 'Instrument Serif', fontSize: '40px', fontStyle: 'italic', color: 'var(--accent)', lineHeight: '1', fontWeight: 400}}>{session.id}</span>
+            <span style={{fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--text-mute)'}}>{session.day}</span>
+          </div>
+          <h2 style={{fontSize: '24px', fontWeight: 700, letterSpacing: '-0.01em', lineHeight: '1.1'}}>{session.title}</h2>
+        </div>
+        <div style={{fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'var(--text-dim)', padding: '6px 10px', background: 'var(--surface)', borderRadius: '6px', border: '1px solid var(--border)', marginTop: '8px'}}>{session.duration}</div>
+      </div>
+
+      <div style={{padding: '10px 14px', background: 'var(--surface-2)', borderRadius: '10px', fontSize: '12px', color: 'var(--text-dim)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap'}}>
+        <span style={{fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--accent)', fontWeight: 600}}>Warm-up</span>
+        <span>5 min light walk + 1 light set before first lift</span>
+      </div>
+
+      {session.exercises.map((ex, i) => <ExerciseCard key={i} exercise={ex} index={i} />)}
+    </div>
+  );
+}
+
+function Principles() {
+  const principles = [
+    { num: '01', title: 'Progressive overload', text: 'Each week, add weight or a rep. This is the only thing that grows muscle.' },
+    { num: '02', title: 'Tempo: 2 down, 1 up', text: 'Slow eccentrics build more muscle than fast lifts. Control beats weight.' },
+    { num: '03', title: 'Lift first, walk after', text: 'Heavy cardio before lifting steals strength and blunts results.' },
+    { num: '04', title: 'Train fed, not fasted', text: 'Lift 1–2 hours after breaking your fast. Empty stomach + heavy work = dizziness.' },
+    { num: '05', title: 'Protein anchor', text: '1.6–2.0g per kg of target bodyweight. Without it, lifting won\'t preserve muscle in a deficit.' },
+    { num: '06', title: 'Hydration', text: '2.5–3L water daily. More on training days, especially in Bahrain heat.' },
+  ];
+  return (
+    <div style={{padding: '32px 20px', borderTop: '1px solid var(--border)'}}>
+      <h2 style={{fontFamily: 'Instrument Serif', fontSize: '32px', fontWeight: 400, marginBottom: '20px', letterSpacing: '-0.01em'}}>Operating principles</h2>
+      <div style={{display: 'grid', gap: '10px'}}>
+        {principles.map(p => (
+          <div key={p.num} style={{padding: '14px 16px', background: 'var(--surface)', borderRadius: '12px', border: '1px solid var(--border)'}}>
+            <div style={{display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px'}}>
+              <span style={{fontFamily: 'JetBrains Mono', fontSize: '10px', color: 'var(--accent)', fontWeight: 700}}>— {p.num}</span>
+              <span style={{fontSize: '14px', fontWeight: 600}}>{p.title}</span>
+            </div>
+            <p style={{fontSize: '13px', color: 'var(--text-dim)', lineHeight: '1.5'}}>{p.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Warning() {
+  return (
+    <div style={{padding: '0 20px 32px'}}>
+      <div style={{padding: '20px', background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.3)', borderLeft: '3px solid var(--warn)', borderRadius: '12px'}}>
+        <div style={{display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px', color: 'var(--warn)'}}>
+          <Icon.Warning />
+          <span style={{fontFamily: 'JetBrains Mono', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 700}}>Back off if you feel</span>
+        </div>
+        <ul style={{listStyle: 'none', marginBottom: '14px'}}>
+          {['Sharp dizziness or near-fainting, especially during fasting hours','Persistent fatigue lasting more than 2 days','Strength dropping for 2+ consecutive weeks','Sleep getting worse, not better'].map((t, i) => (
+            <li key={i} style={{paddingLeft: '20px', paddingBottom: '8px', position: 'relative', fontSize: '13px', color: 'var(--text-dim)', lineHeight: '1.5'}}>
+              <span style={{position: 'absolute', left: 0, color: 'var(--warn)', fontWeight: 700}}>→</span>{t}
+            </li>
+          ))}
+        </ul>
+        <p style={{fontSize: '13px', color: 'var(--text)', fontStyle: 'italic', lineHeight: '1.5', paddingTop: '12px', borderTop: '1px solid rgba(245, 158, 11, 0.2)'}}>
+          Reduce weights 10–15% for a week, add a rest day, or revisit your calorie deficit. Excessive deficit + heavy training = muscle loss, not fat loss.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [activeSession, setActiveSession] = useState('A');
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id.replace('day-', '');
+            setActiveSession(id);
+          }
+        });
+      },
+      { rootMargin: '-30% 0px -60% 0px' }
+    );
+    PLAN.sessions.forEach(s => {
+      const el = document.getElementById(`day-${s.id}`);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div style={{maxWidth: '600px', margin: '0 auto', minHeight: '100vh', background: 'var(--bg)'}}>
+      <Header />
+      <WeeklySchedule />
+      <SequencingCard />
+
+      <div style={{position: 'sticky', top: 0, zIndex: 10, background: 'rgba(10,10,10,0.95)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid var(--border)', padding: '12px 20px'}}>
+        <div style={{display: 'flex', gap: '8px'}}>
+          {PLAN.sessions.map(s => (
+            <button key={s.id} onClick={() => { document.getElementById(`day-${s.id}`)?.scrollIntoView({behavior: 'smooth', block: 'start'}); }}
+              style={{flex: 1, padding: '10px 8px', background: activeSession === s.id ? 'var(--accent)' : 'var(--surface)', border: '1px solid ' + (activeSession === s.id ? 'var(--accent)' : 'var(--border)'), borderRadius: '10px', fontSize: '12px', fontWeight: 600, color: activeSession === s.id ? '#fff' : 'var(--text-dim)', fontFamily: 'JetBrains Mono', letterSpacing: '0.05em', textTransform: 'uppercase', transition: 'all 0.2s'}}>
+              Day {s.id}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {PLAN.sessions.map(s => <Session key={s.id} session={s} />)}
+
+      <Principles />
+      <Warning />
+
+      <div style={{padding: '20px', textAlign: 'center', fontFamily: 'JetBrains Mono', fontSize: '10px', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--text-mute)', borderTop: '1px solid var(--border)'}}>
+        3-Day Plan · v2.0 · Review at week 6
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
